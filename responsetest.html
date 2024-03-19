@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>클릭 반응 속도 측정</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+    }
+
+    .container {
+        text-align: center;
+        display: flex; /* 추가 */
+        flex-direction: column; /* 추가 */
+        align-items: center; /* 추가 */
+    }
+
+    .box {
+        width: 150px;
+        height: 150px;
+        background-color: white;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        color: #333;
+        border: 2px solid #333;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .box:hover {
+        background-color: #e0e0e0;
+    }
+
+    #result {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>클릭 반응 속도 측정</h1>
+    <div class="box" id="box">클릭하여 시작</div>
+    <p id="result"></p>
+</div>
+
+<script>
+    var box = document.getElementById('box');
+    var result = document.getElementById('result');
+    var startTime, endTime;
+    var started = false;
+
+    function getRandomTime() {
+        return Math.floor(Math.random() * 2000) + 1000;
+    }
+
+    function changeColor() {
+        box.style.backgroundColor = 'red';
+        box.textContent = '클릭하세요!';
+        startTime = new Date();
+    }
+
+    function handleClick() {
+        if (!started) {
+            started = true;
+            box.style.backgroundColor = 'blue';
+            box.textContent = '준비 중...';
+            setTimeout(function() {
+                changeColor();
+            }, getRandomTime());
+        } else {
+            if (box.style.backgroundColor === 'blue') {
+                result.textContent = "너무 빨리 클릭했습니다!";
+            } else {
+                endTime = new Date();
+                var reactionTime = endTime - startTime;
+                result.textContent = "반응 속도: " + reactionTime + "ms";
+                setTimeout(function() {
+                    box.style.backgroundColor = 'white';
+                    box.textContent = '클릭하여 시작';
+                    result.textContent = "";
+                    started = false;
+                }, 1000);
+            }
+        }
+    }
+
+    box.addEventListener('click', handleClick);
+</script>
+
+</body>
+</html>

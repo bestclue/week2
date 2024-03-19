@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classic Puzzle Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  h1 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  #puzzle-container {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 2px;
+    margin-bottom: 20px;
+    height: 300px; /* 높이를 300px로 고정 */
+  }
+  
+  .puzzle-piece {
+    width: 100px;
+    height: 100px;
+    background-color: #ccc;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .puzzle-piece:hover {
+    background-color: #ddd;
+  }
+  
+  .empty {
+    visibility: hidden;
+  }
+
+  #result-container {
+    margin-bottom: 20px;
+    height: 100px; /* 높이를 300px로 고정 */
+    flex-direction: column; /* 세로 중앙 정렬 */
+    align-items: center; /* 수직 정렬 */
+    flex-direction: row; /* 가로로 정렬 */
+    display: flex;
+  }
+
+  #result {
+    font-size: 20px;
+    color: #4CAF50;
+    font-weight: bold;
+    animation: congratulations 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes congratulations {
+    0% {
+        color: #4CAF50; /* 초록색 */
+    }
+    25% {
+        color: #FFD700; /* 황금색 */
+    }
+    50% {
+        color: #FF6347; /* 적색 */
+    }
+    75% {
+        color: #4169E1; /* 파란색 */
+    }
+    100% {
+        color: #4CAF50; /* 초록색 */
+    }
+}
+
+
+  #restart {
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>Classic Puzzle Game</h1>
+<div id="puzzle-container"></div>
+<div id="result-container">
+  <div id="result"></div>
+  <div id="restart" style="display: none;"><span style="font-size: 24px;">🔄️</span></div>
+</div>
+
+<script>
+  // 퍼즐 조각 배열 생성
+  const pieces = [];
+  for (let i = 1; i <= 9; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'puzzle-piece';
+    piece.textContent = i;
+    piece.addEventListener('click', () => movePiece(piece));
+    pieces.push(piece);
+  }
+  // 마지막 조각은 빈 칸으로 설정
+  pieces[8].textContent = '';
+  pieces[8].classList.add('empty');
+
+  // 랜덤하게 퍼즐 조각 섞기
+  shufflePieces();
+
+  // 퍼즐 조각 배치
+  const puzzleContainer = document.getElementById('puzzle-container');
+  pieces.forEach(piece => puzzleContainer.appendChild(piece));
+
+  // 이동 횟수 변수
+  let moveCount = 0;
+
+  // 퍼즐 조각 이동 함수
+  function movePiece(clickedPiece) {
+    // 빈 칸 찾기
+    const emptyPieceIndex = pieces.findIndex(piece => piece.textContent === '');
+    const clickedPieceIndex = pieces.indexOf(clickedPiece);
+
+    // 빈 칸과 클릭한 조각이 인접하면 이동
+    if (isAdjacent(emptyPieceIndex, clickedPieceIndex)) {
+      // 빈 칸과 클릭한 조각의 텍스트 교환
+      [pieces[emptyPieceIndex].textContent, pieces[clickedPieceIndex].textContent] = [pieces[clickedPieceIndex].textContent, pieces[emptyPieceIndex].textContent];
+      // 빈 칸 위치 업데이트
+      pieces[emptyPieceIndex].classList.remove('empty');
+      clickedPiece.classList.add('empty');
+      // 이동 횟수 증가
+      moveCount++;
+      // 이동 횟수가 10회를 초과하면 새로고침 아이콘 표시
+      if (moveCount > 100) {
+        document.getElementById('restart').style.display = "block";
+      }
+      // 퍼즐이 완성되었는지 확인
+      if (isPuzzleComplete()) {
+        document.getElementById('result').textContent = `🎉축하합니다! 퍼즐을 ${moveCount}번 만에 맞추셨습니다!🎉`;
+        document.getElementById('restart').style.display = "block";
+      }
+    }
+  }
+
+  // 두 퍼즐 조각이 인접한지 확인
+  function isAdjacent(index1, index2) {
+    const rowDiff = Math.abs(Math.floor(index1 / 3) - Math.floor(index2 / 3));
+    const colDiff = Math.abs((index1 % 3) - (index2 % 3));
+    return (rowDiff === 1 && colDiff === 0) || (colDiff === 1 && rowDiff === 0);
+  }
+
+  // 배열 섞는 함수
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  // 랜덤하게 퍼즐 조각 섞는 함수 (해결 가능한 퍼즐인지 확인)
+  function shufflePieces() {
+    do {
+      shuffle(pieces);
+    } while (!isSolvable(pieces));
+  }
+
+  // 해결 가능한 퍼즐인지 확인하는 함수
+  function isSolvable(pieces) {
+    let inversions = 0;
+    for (let i = 0; i < 8; i++) {
+      for (let j = i + 1; j < 9; j++) {
+        if (parseInt(pieces[i].textContent) > parseInt(pieces[j].textContent)) {
+          inversions++;
+        }
+      }
+    }
+    return inversions % 2 === 0;
+  }
+
+  // 퍼즐이 완성되었는지 확인하는 함수
+  function isPuzzleComplete() {
+    for (let i = 0; i < 8; i++) {
+      if (parseInt(pieces[i].textContent) !== i + 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // 새로고침 함수
+  function refreshPage() {
+    window.location.reload();
+  }
+
+  // 새로고침 아이콘 클릭 이벤트
+  const refreshIcon = document.getElementById('restart');
+  refreshIcon.addEventListener('click', refreshPage);
+</script>
+</body>
+</html>

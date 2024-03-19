@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숫자 맞추기 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #gameContainer {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 500px; /* 너비를 조정하세요 */
+            height: 300px; /* 높이를 조정하세요 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #inputContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        #guessInput {
+            padding: 5px;
+            width: 50px;
+            margin-right: 10px;
+        }
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .higher {
+            color: red;
+        }
+        .lower {
+            color: blue;
+        }
+        .invalid {
+            color: red;
+        }
+        .success {
+            animation: textPulse 1s infinite alternate;
+        }
+        @keyframes textPulse {
+            0% { font-size: 20px; }
+            100% { font-size: 24px; }
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1>숫자 맞추기 게임</h1>
+        <p>1부터 100까지의 숫자 중 하나를 맞춰보세요!</p>
+        <div id="inputContainer">
+            <label for="guessInput">숫자를 입력하세요: </label>
+            <input type="text" id="guessInput" onkeydown="if(event.keyCode==13) checkGuess()">
+            <button onclick="checkGuess()">확인</button>
+        </div>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        // 정답 숫자를 랜덤하게 생성
+        const correctNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+
+        function checkGuess() {
+            const guessInput = document.getElementById('guessInput');
+            const guess = parseInt(guessInput.value);
+            
+            // 숫자 범위 검사
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                document.getElementById('output').innerHTML = `<span class="invalid">1부터 100 사이의 값을 입력하세요.</span>`;
+                guessInput.value = ""; // 입력 필드 비우기
+                return;
+            }
+            
+            attempts++;
+
+            if (guess === correctNumber) {
+                document.getElementById('output').innerHTML = `축하합니다! ${attempts}번째 시도로 숫자를 맞췄습니다!`;
+                document.getElementById('output').classList.add('success');
+            } else if (guess < correctNumber) {
+                document.getElementById('output').innerHTML = `<span class="higher">입력한 숫자(${guess})보다 더 높은 숫자를 입력하세요.</span>`;
+            } else {
+                document.getElementById('output').innerHTML = `<span class="lower">입력한 숫자(${guess})보다 더 낮은 숫자를 입력하세요.</span>`;
+            }
+
+            // 입력 필드 비우기
+            guessInput.value = "";
+        }
+    </script>
+</body>
+</html>
